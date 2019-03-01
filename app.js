@@ -10,6 +10,10 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 var app = express();
+var cors = require('cors')
+
+
+
 
 
 
@@ -22,15 +26,6 @@ var connection = mysql.createConnection({
 
 connection.connect();
 
-var createrole = {
-    name: "testrole"
-
-}
-// now the createStudent is an object you can use in your database insert logic.
-connection.query('INSERT INTO role SET ?', createrole, function (err, resp) {
-    if (err) throw err;
-    // if there are no errors send an OK message.
-});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -60,5 +55,7 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+
 
 module.exports = app;
