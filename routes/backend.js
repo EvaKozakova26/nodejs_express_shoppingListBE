@@ -1,6 +1,10 @@
 var express = require('express');
 var app = express();
 var mysql = require('mysql');
+var User = require('../model/user.js');
+var Item = require('../model/item.js');
+var ShoppingList = require('../model/shopping_list.js');
+
 
 // enble cors
 app.use(function(req, res, next) {
@@ -19,25 +23,41 @@ var connectionDB = mysql.createConnection({
 connectionDB.connect();
 
 
-
-app.get("/api/getLists", (req, res, next) => {
-    res.json(["Tony","Lisa","Michael","Ginger","Food"]);
-});
-
 app.post("/api/newItem", (req, res, next) => {
     let newItem = {
         count: req.body.count,
-        created_At: new Date().toLocaleString(),
+        created_at: new Date().toLocaleString(),
         name: req.body.name,
         state: req.body.state
     }
-    var query = connectionDB.query('INSERT INTO item SET ?', newItem, function(err, result) {
-        if (err) throw err;
-        console.log("1 record inserted");
+
+    Item.create({ count: newItem.count, created_at: newItem.created_at, name: newItem.name, state: newItem.state }).then(task => {
+        console.log("created item hoho " + task);
+        res.send(task);
     });
 
 });
 
+app.post("/api/saveList", (req, res, next) => {
+    let newList = {
+        created_at: new Date().toLocaleString(),
+    }
 
+    ShoppingList.create({ created_at: newList.created_at}).then(createdList => {
+        console.log("created  hoho " + createdList)
+
+        req.body.forEach(function (item) {
+            Item.update({
+                shopping_list_id: createdList.id,
+            }, {
+                where: { id: item.id },
+            })
+                .then(function (result) {
+                    console.log(result);
+                })
+        })
+
+    })
+});
 
 module.exports = app;
