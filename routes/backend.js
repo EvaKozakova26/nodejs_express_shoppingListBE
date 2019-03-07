@@ -8,7 +8,8 @@ const LocalStrategy = require('passport-local').Strategy;
 var session = require("express-session");
 var bodyParser = require("body-parser");
 
-
+const bcrypt = require('bcrypt-nodejs');
+const saltRounds = 10;
 app.use(cookieParser('abcdefg'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
@@ -34,7 +35,12 @@ passport.use('local', new LocalStrategy(
         User.findAll({where: {
                 name: username
             }}).then(user => {
+            let isPasswordValid = bcrypt.compareSync(password, user[0].dataValues.password);
+            if (isPasswordValid) {
                 return done(null, user);
+            } else {
+                console.log("password not valid")
+            }
         });
     }
 ));
@@ -196,15 +202,19 @@ app.post("/api/updateList", (req, res, next) => {
 
 //auth
 app.post("/api/register", (req, res, next) => {
+    let hash = bcrypt.hashSync(req.body.password);
     let newUser = {
         name: req.body.name,
-        password: req.body.password
-    }
-    User.create({ name: newUser.name, password: newUser.password }).then(task => {
+        password: hash
+    };
+    return User.create({ name: newUser.name, password: newUser.password }).then(task => {
         res.send(task);
     });
 
 });
+
+
+
 
 
 app.post('/api/loginUser', function(req, res, next) {
@@ -218,6 +228,11 @@ app.post('/api/loginUser', function(req, res, next) {
     })(req, res, next);
 });
 
+
+app.get('/api/logoutUser', function(req, res){
+    req.logout();
+    res.send([]);
+});
 
 
 module.exports = app;
