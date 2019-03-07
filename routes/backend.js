@@ -21,6 +21,9 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+const cache = require('memory-cache');
+
+
 var mysql = require('mysql');
 var User = require('../model/user.js');
 var Item = require('../model/item.js');
@@ -44,6 +47,26 @@ passport.use('local', new LocalStrategy(
         });
     }
 ));
+
+// configure cache middleware
+let memCache = new cache.Cache();
+let cacheMiddleware = (duration) => {
+    return (req, res, next) => {
+        let key =  '__express__' + req.originalUrl || req.url
+        let cacheContent = memCache.get(key);
+        if(cacheContent){
+            res.send( cacheContent );
+            return
+        }else{
+            res.sendResponse = res.send
+            res.send = (body) => {
+                memCache.put(key,body,duration*1000);
+                res.sendResponse(body)
+            }
+            next()
+        }
+    }
+}
 
 
 
@@ -103,7 +126,7 @@ app.get("/api/getLists", (req, res, next) => {
     }
 });
 
-app.post("/api/getItems", (req, res, next) => {
+app.post("/api/getItems",  cacheMiddleware(30),(req, res, next) => {
     Item.findAll({where: {
         shopping_list_id: req.body.id
         }}).then(items => {
