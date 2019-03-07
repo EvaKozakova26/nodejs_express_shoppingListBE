@@ -1,9 +1,45 @@
+
 var express = require('express');
 var app = express();
+const passport = require('passport');
+var cookieParser = require('cookie-parser');
+const LocalStrategy = require('passport-local').Strategy;
+
+var session = require("express-session");
+var bodyParser = require("body-parser");
+
+
+app.use(cookieParser('abcdefg'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(session({
+    secret: 'abcdefg',
+    resave: true,
+    saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
 var mysql = require('mysql');
 var User = require('../model/user.js');
 var Item = require('../model/item.js');
 var ShoppingList = require('../model/shopping_list.js');
+
+passport.use('local', new LocalStrategy(
+    {
+        usernameField : 'name',
+        passwordField : 'password'
+    },
+    function(username, password, done) {
+        User.findAll({where: {
+                name: username
+            }}).then(user => {
+                return done(null, user);
+        });
+    }
+));
+
+
 
 
 // enble cors
@@ -15,7 +51,22 @@ app.use(function(req, res, next) {
     next();
 });
 
-var connectionDB = mysql.createConnection({
+passport.serializeUser(function(user, done) {
+    console.log('serialize: ' + user[0].dataValues.id)
+    done(null, user[0].dataValues.id);
+});
+
+passport.deserializeUser(function(id, done) {
+    User.findById(id).then(function(user) {
+        done(null, user);
+    }).catch(function(err) {
+        if (err) {
+            throw err;
+        }
+    });
+});
+
+const connectionDB = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'root',
@@ -24,11 +75,26 @@ var connectionDB = mysql.createConnection({
 connectionDB.connect();
 
 
+app.get('*', function(req, res,next){
+    res.locals.user = req.user || null;
+    next();
+})
+app.post('*', function(req, res,next){
+    res.locals.user = req.user || null;
+    next();
+})
 
 app.get("/api/getLists", (req, res, next) => {
-     ShoppingList.findAll().then(lists => {
-        res.send(lists)
-    });
+    if (req.isAuthenticated()) {
+        ShoppingList.findAll({where: {
+                user_id: req.user.dataValues.id
+            }}).then(lists => {
+            console.log(req.user.name + " current user")
+            res.send(lists)
+        });
+    } else {
+        res.send([])
+    }
 });
 
 app.post("/api/getItems", (req, res, next) => {
@@ -44,21 +110,23 @@ app.post("/api/saveList", (req, res, next) => {
         created_at: new Date().toLocaleString(),
     }
 
-    ShoppingList.create({ created_at: newList.created_at}).then(createdList => {
-        console.log("created  hoho " + createdList)
+    if (req.isAuthenticated()) {
+        ShoppingList.create({ created_at: newList.created_at, user_id: req.user.dataValues.id}).then(createdList => {
+            console.log("created  hoho " + createdList)
 
-        req.body.forEach(function (item) {
-            Item.update({
-                shopping_list_id: createdList.id,
-            }, {
-                where: { id: item.id },
-            })
-                .then(function (result) {
-                    console.log(result);
+            req.body.forEach(function (item) {
+                Item.update({
+                    shopping_list_id: createdList.id,
+                }, {
+                    where: { id: item.id },
                 })
-        })
+                    .then(function (result) {
+                        console.log(result);
+                    })
+            })
 
-    })
+        })
+    }
 });
 
 
@@ -126,8 +194,29 @@ app.post("/api/updateList", (req, res, next) => {
 
 });
 
+//auth
+app.post("/api/register", (req, res, next) => {
+    let newUser = {
+        name: req.body.name,
+        password: req.body.password
+    }
+    User.create({ name: newUser.name, password: newUser.password }).then(task => {
+        res.send(task);
+    });
+
+});
 
 
+app.post('/api/loginUser', function(req, res, next) {
+    passport.authenticate('local', {session: true},function(err, user, info) {
+        if (err) { return next(err); }
+        if (!user) { return res.redirect('/login'); }
+        req.logIn(user, function(err) {
+            if (err) { return next(err); }
+        });
+        return res.send(user);
+    })(req, res, next);
+});
 
 
 

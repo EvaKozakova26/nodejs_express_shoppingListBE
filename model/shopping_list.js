@@ -1,4 +1,5 @@
-const Sequelize = require('sequelize')
+const Sequelize = require('sequelize');
+const User = require('../model/user.js');
 
 
 const dbConnection = new Sequelize('demo', 'root', 'root', {
@@ -16,11 +17,18 @@ const dbConnection = new Sequelize('demo', 'root', 'root', {
 })
 
 const ShoppingList = dbConnection.define('shopping_list', {
+        id: {
+            type: Sequelize.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
         created_at: new Date(),
     },
     {
         tableName: 'shopping_list'
     });
+ShoppingList.belongsTo(User, {foreignKey: 'user_id'}, { onDelete: 'cascade' });
+
 
 module.exports = ShoppingList
 

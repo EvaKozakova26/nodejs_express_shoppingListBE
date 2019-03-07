@@ -1,4 +1,4 @@
-const Sequelize = require('sequelize')
+const Sequelize = require('sequelize');
 var ShoppingList = require('../model/shopping_list.js');
 
 
@@ -31,7 +31,7 @@ const Item = dbConnection.define('item', {
     {
         tableName: 'item'
     });
-Item.belongsTo(ShoppingList, {foreignKey: 'shopping_list_id'}, { onDelete: 'cascade' })
+Item.belongsTo(ShoppingList, {foreignKey: 'shopping_list_id'}, { onDelete: 'cascade' });
 
 module.exports = Item
 

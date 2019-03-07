@@ -1,4 +1,4 @@
-const Sequelize = require('sequelize')
+const Sequelize = require('sequelize');
 var Role = require('../model/role.js');
 
 
@@ -24,7 +24,7 @@ const User = dbConnection.define('user', {
     {
         tableName: 'user'
     });
-User.belongsTo(Role, {foreignKey: 'role_id'})
+User.belongsTo(Role, {foreignKey: 'role_id'});
 
 module.exports = User
 

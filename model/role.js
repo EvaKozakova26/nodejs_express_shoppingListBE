@@ -1,5 +1,4 @@
-const Sequelize = require('sequelize')
-var ShoppingList = require('../model/shopping_list.js');
+const Sequelize = require('sequelize');
 
 
 
