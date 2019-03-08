@@ -52,7 +52,7 @@ passport.use('local', new LocalStrategy(
 let memCache = new cache.Cache();
 let cacheMiddleware = (duration) => {
     return (req, res, next) => {
-        let key =  '__express__' + req.originalUrl || req.url
+        let key =  'myKey' + req.originalUrl || req.url
         let cacheContent = memCache.get(key);
         if(cacheContent){
             res.send( cacheContent );
