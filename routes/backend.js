@@ -28,6 +28,7 @@ var mysql = require('mysql');
 var User = require('../model/user.js');
 var Item = require('../model/item.js');
 var ShoppingList = require('../model/shopping_list.js');
+var Role = require('../model/role.js');
 
 passport.use('local', new LocalStrategy(
     {
@@ -230,8 +231,11 @@ app.post("/api/register", (req, res, next) => {
         name: req.body.name,
         password: hash
     };
-    return User.create({ name: newUser.name, password: newUser.password }).then(task => {
-        res.send(task);
+
+    let role = Role.findOne({ where: {name: 'user'} }).then(role => {
+        return User.create({ name: newUser.name, password: newUser.password, role_id: role.id }).then(task => {
+            res.send(task);
+        });
     });
 
 });
