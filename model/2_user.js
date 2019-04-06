@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
-const User = require('../model/user.js');
+var Role = require('../model/1_role.js');
+
 
 
 const dbConnection = new Sequelize('demo', 'root', 'root', {
@@ -16,20 +17,25 @@ const dbConnection = new Sequelize('demo', 'root', 'root', {
     }
 })
 
-const ShoppingList = dbConnection.define('shopping_list', {
+const User = dbConnection.define('user', {
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
             autoIncrement: true
         },
-        created_at: new Date(),
+        name: Sequelize.STRING,
+        password: Sequelize.STRING
     },
     {
-        tableName: 'shopping_list'
+        tableName: 'users'
     });
-ShoppingList.belongsTo(User, {foreignKey: 'user_id'}, { onDelete: 'cascade' });
+User.belongsTo(Role, {foreignKey: 'role_id'});
 
-
-module.exports = ShoppingList
+dbConnection.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true }).then ( function () {
+    dbConnection.sync ().then ( function () {
+        // Do something...
+    });
+});
+module.exports = User;
 
 

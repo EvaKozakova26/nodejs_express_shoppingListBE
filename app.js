@@ -11,6 +11,7 @@ var usersRouter = require('./routes/users');
 
 var app = express();
 var cors = require('cors')
+const Sequelize = require('sequelize');
 
 
 
@@ -25,7 +26,6 @@ var connection = mysql.createConnection({
 });
 
 connection.connect();
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');

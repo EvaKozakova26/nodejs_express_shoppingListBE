@@ -25,10 +25,12 @@ const cache = require('memory-cache');
 
 
 var mysql = require('mysql');
-var User = require('../model/user.js');
-var Item = require('../model/item.js');
-var ShoppingList = require('../model/shopping_list.js');
-var Role = require('../model/role.js');
+var Role = require('../model/1_role.js');
+var User = require('../model/2_user.js');
+var Item = require('../model/4_item.js');
+var ShoppingList = require('../model/3_shopping_list');
+
+
 
 passport.use('local', new LocalStrategy(
     {

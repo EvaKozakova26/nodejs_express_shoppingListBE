@@ -17,12 +17,23 @@ const dbConnection = new Sequelize('demo', 'root', 'root', {
 })
 
 const Role = dbConnection.define('role', {
+        id: {
+            type: Sequelize.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
         name: Sequelize.STRING,
     },
     {
-        tableName: 'role'
+        tableName: 'roles'
     });
 
-module.exports = Role
+dbConnection.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true }).then ( function () {
+    dbConnection.sync ().then ( function () {
+        // Do something...
+    });
+});
+
+module.exports = Role;
 
 
