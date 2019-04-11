@@ -129,7 +129,7 @@ app.get("/api/getLists", (req, res, next) => {
     }
 });
 
-app.post("/api/getItems",  cacheMiddleware(30),(req, res, next) => {
+app.post("/api/getItems",(req, res, next) => {
     Item.findAll({where: {
         shopping_list_id: req.body.id
         }}).then(items => {
@@ -144,7 +144,6 @@ app.post("/api/saveList", (req, res, next) => {
 
     if (req.isAuthenticated()) {
         ShoppingList.create({ created_at: newList.created_at, user_id: req.user.dataValues.id}).then(createdList => {
-            console.log("created  hoho " + createdList)
 
             req.body.forEach(function (item) {
                 Item.update({
