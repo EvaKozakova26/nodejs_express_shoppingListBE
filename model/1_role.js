@@ -14,7 +14,7 @@ const dbConnection = new Sequelize('demo', 'root', 'root', {
         acquire: 30000,
         idle: 10000
     }
-})
+});
 
 const Role = dbConnection.define('role', {
         id: {
@@ -30,7 +30,10 @@ const Role = dbConnection.define('role', {
 
 dbConnection.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true }).then ( function () {
     dbConnection.sync ().then ( function () {
-        // Do something...
+        dbConnection.query('delete from roles', { raw: true }).then ( function () {
+            dbConnection.query('insert into roles (id, name) values (1, "user")', { raw: true }).then ( function () {
+            });
+        });
     });
 });
 

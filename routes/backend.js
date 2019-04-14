@@ -55,21 +55,21 @@ passport.use('local', new LocalStrategy(
 let memCache = new cache.Cache();
 let cacheMiddleware = (duration) => {
     return (req, res, next) => {
-        let key =  'myKey' + req.originalUrl || req.url
+        let key =  'myKey' + req.originalUrl || req.url;
         let cacheContent = memCache.get(key);
         if(cacheContent){
             res.send( cacheContent );
             return
         }else{
-            res.sendResponse = res.send
+            res.sendResponse = res.send;
             res.send = (body) => {
                 memCache.put(key,body,duration*1000);
                 res.sendResponse(body)
-            }
+            };
             next()
         }
     }
-}
+};
 
 
 
@@ -110,18 +110,18 @@ connectionDB.connect();
 app.get('*', function(req, res,next){
     res.locals.user = req.user || null;
     next();
-})
+});
 app.post('*', function(req, res,next){
     res.locals.user = req.user || null;
     next();
-})
+});
 
 app.get("/api/getLists", (req, res, next) => {
     if (req.isAuthenticated()) {
         ShoppingList.findAll({where: {
                 user_id: req.user.dataValues.id
             }}).then(lists => {
-            console.log(req.user.name + " current user")
+            console.log(req.user.name + " current user");
             res.send(lists)
         });
     } else {
@@ -140,7 +140,7 @@ app.post("/api/getItems",(req, res, next) => {
 app.post("/api/saveList", (req, res, next) => {
     let newList = {
         created_at: new Date().toLocaleString(),
-    }
+    };
 
     if (req.isAuthenticated()) {
         ShoppingList.create({ created_at: newList.created_at, user_id: req.user.dataValues.id}).then(createdList => {
@@ -167,10 +167,9 @@ app.post("/api/newItem", (req, res, next) => {
         created_at: new Date().toLocaleString(),
         name: req.body.name,
         state: req.body.state
-    }
+    };
 
     Item.create({ count: newItem.count, created_at: newItem.created_at, name: newItem.name, state: newItem.state }).then(task => {
-        console.log("created item hoho " + task);
         res.send(task);
     });
 
@@ -193,7 +192,7 @@ app.delete("/api/deleteItem", (req, res, next) => {
         where: {
             id: req.body.id
         }
-    })
+    });
     res.send(req.body)
 
 });
@@ -204,7 +203,7 @@ app.delete("/api/deleteList", (req, res, next) => {
         where: {
             id: req.body.id
         }
-    })
+    });
     res.send(req.body)
 
 });
@@ -220,7 +219,7 @@ app.post("/api/updateList", (req, res, next) => {
             .then(function (result) {
                 console.log(result);
             })
-    })
+    });
     res.send(req.body.shoppingList)
 
 });
